@@ -1,0 +1,682 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Laravel 8 and Twitter Type Ahead</title><style>
+    /* cspell:disable-file */
+    /* webkit printing magic: print all background colors */
+    html {
+        -webkit-print-color-adjust: exact;
+    }
+    * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact;
+    }
+    
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    @media only screen {
+        body {
+            margin: 2em auto;
+            max-width: 900px;
+            color: rgb(55, 53, 47);
+        }
+    }
+    
+    body {
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+    
+    a,
+    a.visited {
+        color: inherit;
+        text-decoration: underline;
+    }
+    
+    .pdf-relative-link-path {
+        font-size: 80%;
+        color: #444;
+    }
+    
+    h1,
+    h2,
+    h3 {
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: 0.75em;
+    }
+    
+    h1 {
+        font-size: 1.875rem;
+        margin-top: 1.875rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+        margin-top: 1.25rem;
+    }
+    
+    .source {
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 1.5em;
+        word-break: break-all;
+    }
+    
+    .callout {
+        border-radius: 3px;
+        padding: 1rem;
+    }
+    
+    figure {
+        margin: 1.25em 0;
+        page-break-inside: avoid;
+    }
+    
+    figcaption {
+        opacity: 0.5;
+        font-size: 85%;
+        margin-top: 0.5em;
+    }
+    
+    mark {
+        background-color: transparent;
+    }
+    
+    .indented {
+        padding-left: 1.5em;
+    }
+    
+    hr {
+        background: transparent;
+        display: block;
+        width: 100%;
+        height: 1px;
+        visibility: visible;
+        border: none;
+        border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+    }
+    
+    img {
+        max-width: 100%;
+    }
+    
+    @media only print {
+        img {
+            max-height: 100vh;
+            object-fit: contain;
+        }
+    }
+    
+    @page {
+        margin: 1in;
+    }
+    
+    .collection-content {
+        font-size: 0.875rem;
+    }
+    
+    .column-list {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .column {
+        padding: 0 1em;
+    }
+    
+    .column:first-child {
+        padding-left: 0;
+    }
+    
+    .column:last-child {
+        padding-right: 0;
+    }
+    
+    .table_of_contents-item {
+        display: block;
+        font-size: 0.875rem;
+        line-height: 1.3;
+        padding: 0.125rem;
+    }
+    
+    .table_of_contents-indent-1 {
+        margin-left: 1.5rem;
+    }
+    
+    .table_of_contents-indent-2 {
+        margin-left: 3rem;
+    }
+    
+    .table_of_contents-indent-3 {
+        margin-left: 4.5rem;
+    }
+    
+    .table_of_contents-link {
+        text-decoration: none;
+        opacity: 0.7;
+        border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+    }
+    
+    table,
+    th,
+    td {
+        border: 1px solid rgba(55, 53, 47, 0.09);
+        border-collapse: collapse;
+    }
+    
+    table {
+        border-left: none;
+        border-right: none;
+    }
+    
+    th,
+    td {
+        font-weight: normal;
+        padding: 0.25em 0.5em;
+        line-height: 1.5;
+        min-height: 1.5em;
+        text-align: left;
+    }
+    
+    th {
+        color: rgba(55, 53, 47, 0.6);
+    }
+    
+    ol,
+    ul {
+        margin: 0;
+        margin-block-start: 0.6em;
+        margin-block-end: 0.6em;
+    }
+    
+    li > ol:first-child,
+    li > ul:first-child {
+        margin-block-start: 0.6em;
+    }
+    
+    ul > li {
+        list-style: disc;
+    }
+    
+    ul.to-do-list {
+        text-indent: -1.7em;
+    }
+    
+    ul.to-do-list > li {
+        list-style: none;
+    }
+    
+    .to-do-children-checked {
+        text-decoration: line-through;
+        opacity: 0.375;
+    }
+    
+    ul.toggle > li {
+        list-style: none;
+    }
+    
+    ul {
+        padding-inline-start: 1.7em;
+    }
+    
+    ul > li {
+        padding-left: 0.1em;
+    }
+    
+    ol {
+        padding-inline-start: 1.6em;
+    }
+    
+    ol > li {
+        padding-left: 0.2em;
+    }
+    
+    .mono ol {
+        padding-inline-start: 2em;
+    }
+    
+    .mono ol > li {
+        text-indent: -0.4em;
+    }
+    
+    .toggle {
+        padding-inline-start: 0em;
+        list-style-type: none;
+    }
+    
+    /* Indent toggle children */
+    .toggle > li > details {
+        padding-left: 1.7em;
+    }
+    
+    .toggle > li > details > summary {
+        margin-left: -1.1em;
+    }
+    
+    .selected-value {
+        display: inline-block;
+        padding: 0 0.5em;
+        background: rgba(206, 205, 202, 0.5);
+        border-radius: 3px;
+        margin-right: 0.5em;
+        margin-top: 0.3em;
+        margin-bottom: 0.3em;
+        white-space: nowrap;
+    }
+    
+    .collection-title {
+        display: inline-block;
+        margin-right: 1em;
+    }
+    
+    .simple-table {
+        margin-top: 1em;
+        font-size: 0.875rem;
+        empty-cells: show;
+    }
+    .simple-table td {
+        height: 29px;
+        min-width: 120px;
+    }
+    
+    .simple-table th {
+        height: 29px;
+        min-width: 120px;
+    }
+    
+    .simple-table-header-color {
+        background: rgb(247, 246, 243);
+        color: black;
+    }
+    .simple-table-header {
+        font-weight: 500;
+    }
+    
+    time {
+        opacity: 0.5;
+    }
+    
+    .icon {
+        display: inline-block;
+        max-width: 1.2em;
+        max-height: 1.2em;
+        text-decoration: none;
+        vertical-align: text-bottom;
+        margin-right: 0.5em;
+    }
+    
+    img.icon {
+        border-radius: 3px;
+    }
+    
+    .user-icon {
+        width: 1.5em;
+        height: 1.5em;
+        border-radius: 100%;
+        margin-right: 0.5rem;
+    }
+    
+    .user-icon-inner {
+        font-size: 0.8em;
+    }
+    
+    .text-icon {
+        border: 1px solid #000;
+        text-align: center;
+    }
+    
+    .page-cover-image {
+        display: block;
+        object-fit: cover;
+        width: 100%;
+        max-height: 30vh;
+    }
+    
+    .page-header-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .page-header-icon-with-cover {
+        margin-top: -0.72em;
+        margin-left: 0.07em;
+    }
+    
+    .page-header-icon img {
+        border-radius: 3px;
+    }
+    
+    .link-to-page {
+        margin: 1em 0;
+        padding: 0;
+        border: none;
+        font-weight: 500;
+    }
+    
+    p > .user {
+        opacity: 0.5;
+    }
+    
+    td > .user,
+    td > time {
+        white-space: nowrap;
+    }
+    
+    input[type="checkbox"] {
+        transform: scale(1.5);
+        margin-right: 0.6em;
+        vertical-align: middle;
+    }
+    
+    p {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    
+    .image {
+        border: none;
+        margin: 1.5em 0;
+        padding: 0;
+        border-radius: 0;
+        text-align: center;
+    }
+    
+    .code,
+    code {
+        background: rgba(135, 131, 120, 0.15);
+        border-radius: 3px;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-size: 85%;
+        tab-size: 2;
+    }
+    
+    code {
+        color: #eb5757;
+    }
+    
+    .code {
+        padding: 1.5em 1em;
+    }
+    
+    .code-wrap {
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    
+    .code > code {
+        background: none;
+        padding: 0;
+        font-size: 100%;
+        color: inherit;
+    }
+    
+    blockquote {
+        font-size: 1.25em;
+        margin: 1em 0;
+        padding-left: 1em;
+        border-left: 3px solid rgb(55, 53, 47);
+    }
+    
+    .bookmark {
+        text-decoration: none;
+        max-height: 8em;
+        padding: 0;
+        display: flex;
+        width: 100%;
+        align-items: stretch;
+    }
+    
+    .bookmark-title {
+        font-size: 0.85em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 1.75em;
+        white-space: nowrap;
+    }
+    
+    .bookmark-text {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .bookmark-info {
+        flex: 4 1 180px;
+        padding: 12px 14px 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .bookmark-image {
+        width: 33%;
+        flex: 1 1 180px;
+        display: block;
+        position: relative;
+        object-fit: cover;
+        border-radius: 1px;
+    }
+    
+    .bookmark-description {
+        color: rgba(55, 53, 47, 0.6);
+        font-size: 0.75em;
+        overflow: hidden;
+        max-height: 4.5em;
+        word-break: break-word;
+    }
+    
+    .bookmark-href {
+        font-size: 0.75em;
+        margin-top: 0.25em;
+    }
+    
+    .sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+    .code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+    .serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+    .mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+    .pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+    .pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+    .pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+    .pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+    .pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+    .pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+    .pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+    .pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+    .pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+    .pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+    .pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+    .pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+    .pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+    .pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+    .pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+    .pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+    .highlight-default {
+        color: rgba(55, 53, 47, 1);
+    }
+    .highlight-gray {
+        color: rgba(120, 119, 116, 1);
+        fill: rgba(120, 119, 116, 1);
+    }
+    .highlight-brown {
+        color: rgba(159, 107, 83, 1);
+        fill: rgba(159, 107, 83, 1);
+    }
+    .highlight-orange {
+        color: rgba(217, 115, 13, 1);
+        fill: rgba(217, 115, 13, 1);
+    }
+    .highlight-yellow {
+        color: rgba(203, 145, 47, 1);
+        fill: rgba(203, 145, 47, 1);
+    }
+    .highlight-teal {
+        color: rgba(68, 131, 97, 1);
+        fill: rgba(68, 131, 97, 1);
+    }
+    .highlight-blue {
+        color: rgba(51, 126, 169, 1);
+        fill: rgba(51, 126, 169, 1);
+    }
+    .highlight-purple {
+        color: rgba(144, 101, 176, 1);
+        fill: rgba(144, 101, 176, 1);
+    }
+    .highlight-pink {
+        color: rgba(193, 76, 138, 1);
+        fill: rgba(193, 76, 138, 1);
+    }
+    .highlight-red {
+        color: rgba(212, 76, 71, 1);
+        fill: rgba(212, 76, 71, 1);
+    }
+    .highlight-gray_background {
+        background: rgba(241, 241, 239, 1);
+    }
+    .highlight-brown_background {
+        background: rgba(244, 238, 238, 1);
+    }
+    .highlight-orange_background {
+        background: rgba(251, 236, 221, 1);
+    }
+    .highlight-yellow_background {
+        background: rgba(251, 243, 219, 1);
+    }
+    .highlight-teal_background {
+        background: rgba(237, 243, 236, 1);
+    }
+    .highlight-blue_background {
+        background: rgba(231, 243, 248, 1);
+    }
+    .highlight-purple_background {
+        background: rgba(244, 240, 247, 0.8);
+    }
+    .highlight-pink_background {
+        background: rgba(249, 238, 243, 0.8);
+    }
+    .highlight-red_background {
+        background: rgba(253, 235, 236, 1);
+    }
+    .block-color-default {
+        color: inherit;
+        fill: inherit;
+    }
+    .block-color-gray {
+        color: rgba(120, 119, 116, 1);
+        fill: rgba(120, 119, 116, 1);
+    }
+    .block-color-brown {
+        color: rgba(159, 107, 83, 1);
+        fill: rgba(159, 107, 83, 1);
+    }
+    .block-color-orange {
+        color: rgba(217, 115, 13, 1);
+        fill: rgba(217, 115, 13, 1);
+    }
+    .block-color-yellow {
+        color: rgba(203, 145, 47, 1);
+        fill: rgba(203, 145, 47, 1);
+    }
+    .block-color-teal {
+        color: rgba(68, 131, 97, 1);
+        fill: rgba(68, 131, 97, 1);
+    }
+    .block-color-blue {
+        color: rgba(51, 126, 169, 1);
+        fill: rgba(51, 126, 169, 1);
+    }
+    .block-color-purple {
+        color: rgba(144, 101, 176, 1);
+        fill: rgba(144, 101, 176, 1);
+    }
+    .block-color-pink {
+        color: rgba(193, 76, 138, 1);
+        fill: rgba(193, 76, 138, 1);
+    }
+    .block-color-red {
+        color: rgba(212, 76, 71, 1);
+        fill: rgba(212, 76, 71, 1);
+    }
+    .block-color-gray_background {
+        background: rgba(241, 241, 239, 1);
+    }
+    .block-color-brown_background {
+        background: rgba(244, 238, 238, 1);
+    }
+    .block-color-orange_background {
+        background: rgba(251, 236, 221, 1);
+    }
+    .block-color-yellow_background {
+        background: rgba(251, 243, 219, 1);
+    }
+    .block-color-teal_background {
+        background: rgba(237, 243, 236, 1);
+    }
+    .block-color-blue_background {
+        background: rgba(231, 243, 248, 1);
+    }
+    .block-color-purple_background {
+        background: rgba(244, 240, 247, 0.8);
+    }
+    .block-color-pink_background {
+        background: rgba(249, 238, 243, 0.8);
+    }
+    .block-color-red_background {
+        background: rgba(253, 235, 236, 1);
+    }
+    .select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+    .select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+    .select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+    .select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+    .select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+    .select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+    .select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+    .select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+    .select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+    .select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+    
+    .checkbox {
+        display: inline-flex;
+        vertical-align: text-bottom;
+        width: 16;
+        height: 16;
+        background-size: 16px;
+        margin-left: 2px;
+        margin-right: 5px;
+    }
+    
+    .checkbox-on {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+    }
+    
+    .checkbox-off {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+    }
+        
+    </style></head><body><article id="012878c6-bdda-4446-a0c0-a5a647fbac9e" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">📐</span></div><h1 class="page-title">Laravel 8 and Twitter Type Ahead</h1></header><div class="page-body"><ul id="5ad53ade-73b6-4257-bc7c-da4d6682c7cf" class="toggle"><li><details open=""><summary>Video Tutorials</summary><p id="f367f235-d9b6-4721-816e-8e4a31773e73" class="">Mysql Search</p><figure id="da25dd7d-5759-42e3-a875-07925a56e34e"><a href="https://www.youtube.com/watch?v=_RMw4nDTEGs" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">MySQL Search Tutorial 12 | LIKE</div><div class="bookmark-description">We&#x27;ll learn how to siphon through a database with this mysql search tutorial. We will use the LIKE keyword to create a simple search query, it&#x27;s quite easy!h...</div></div><div class="bookmark-href"><img src="https://www.youtube.com/s/desktop/7c6fa3df/img/favicon.ico" class="icon bookmark-icon"/>https://www.youtube.com/watch?v=_RMw4nDTEGs</div></div><img src="https://i.ytimg.com/vi/_RMw4nDTEGs/hqdefault.jpg" class="bookmark-image"/></a></figure><figure id="d4349c69-0f14-45e8-85ed-41c31b62e191"><a href="https://www.youtube.com/results?search_query=twitter+typeahead+laravel" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title"></div></div><div class="bookmark-href"><img src="https://www.youtube.com/s/desktop/a7e1bc86/img/favicon.ico" class="icon bookmark-icon"/>https://www.youtube.com/results?search_query=twitter+typeahead+laravel</div></div></a></figure><figure id="8346deba-b452-4594-8ff3-8bd2cb5384d1"><a href="https://www.youtube.com/watch?v=cADdc3D3P9k" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">How to make simple autocomplete in Laravel framework | How to question in Laravel | learn24bd</div><div class="bookmark-description">Autocomplete is the most important component in our web application. In this video, I will teach you how to make a simple autocomplete using jQuery UI in the...</div></div><div class="bookmark-href"><img src="https://www.youtube.com/s/desktop/48993c9a/img/favicon.ico" class="icon bookmark-icon"/>https://www.youtube.com/watch?v=cADdc3D3P9k</div></div><img src="http://i.ytimg.com/vi/cADdc3D3P9k/hqdefault.jpg" class="bookmark-image"/></a></figure><figure id="60635386-42dc-4fe7-aa10-1737a5cfd6f6"><div class="source"><a href="https://www.youtube.com/watch?v=3TgLBU87FDs">https://www.youtube.com/watch?v=3TgLBU87FDs</a></div></figure><figure id="b1158405-060a-471b-b93d-40613fdd40af"><div class="source"><a href="https://www.youtube.com/watch?v=cbjuiHoXqXE">https://www.youtube.com/watch?v=cbjuiHoXqXE</a></div></figure></details></li></ul><ul id="95c7fa3d-cba8-424d-aab2-b5d8b11faac1" class="toggle"><li><details open=""><summary>Source Code</summary><figure id="a5ddf236-724f-40aa-88af-7141009e55ad"><a href="https://www.webslesson.info/2021/07/autocomplete-search-in-laravel-8-using-typeaheadjs.html" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Autocomplete Search in Laravel 8 using Typeahead.js</div><div class="bookmark-description">Autocomplete or Live Search is nice functionality, because it has give us auto suggestion or recommendations, when we have start type in input field. If you have not know but Autocomplete feature has provide helps to User in different ways like auto search suggestion when we have search some specific product or some specific category.</div></div><div class="bookmark-href"><img src="https://www.webslesson.info/favicon.ico" class="icon bookmark-icon"/>https://www.webslesson.info/2021/07/autocomplete-search-in-laravel-8-using-typeaheadjs.html</div></div><img src="https://lh3.googleusercontent.com/blogger_img_proxy/ABLy4Ey4ZQ9dKosCWf1rssqNmX2Cj4bLbcbOEdy-cozyR2BfJSioI5nR7K_gsz5kTmmmVg7mDKhQw7fuu5fTWE9PrSmZKXiyEaHQieO_8UMcFqcDr6H5=w1200-h630-n-k-no-nu" class="bookmark-image"/></a></figure></details></li></ul><ul id="8c4b18e7-9087-459e-8925-273c8206dc2a" class="toggle"><li><details open=""><summary>Cut Copy Paste</summary><p id="f34c7dfe-083e-4a49-87de-e8933787eea4" class="">$u%nA2x\GKNt^{*C</p><figure id="53166a01-4a40-41ef-b7c9-64862400a805"><a href="https://jpst.it/2Pja3" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">JustPaste.it - Share Text &amp; Images the Easy Way</div></div><div class="bookmark-href"><img src="https://justpaste.it/favicon-16x16.png" class="icon bookmark-icon"/>https://jpst.it/2Pja3</div></div></a></figure><figure id="0883f5d8-7641-40b7-9461-e9674e5b6b69"><a href="https://jpst.it/2Pjab" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">JustPaste.it - Share Text &amp; Images the Easy Way</div></div><div class="bookmark-href"><img src="https://justpaste.it/favicon-16x16.png" class="icon bookmark-icon"/>https://jpst.it/2Pjab</div></div></a></figure></details></li></ul><div><figure id="f1822d9b-51ac-4c9e-9f78-85282c588b7d"><a href="https://laravel.com/docs/8.x/seeding" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Laravel - The PHP Framework For Web Artisans</div><div class="bookmark-description">Laravel includes the ability to seed your database with data using seed classes. All seed classes are stored in the database/seeders directory. By default, a DatabaseSeeder class is defined for you. From this class, you may use the call method to run other seed classes, allowing you to control the seeding order.</div></div><div class="bookmark-href"><img src="https://laravel.com/img/favicon/favicon.ico" class="icon bookmark-icon"/>https://laravel.com/docs/8.x/seeding</div></div><img src="https://laravel.com/img/og-image.jpg" class="bookmark-image"/></a></figure><p id="4278f8b0-bf27-4b0d-a5ca-b25e6c86bf20" class="">
+    </p></div><ul id="222962ee-8918-422a-9902-c99414e5d410" class="toggle"><li><details open=""><summary>Command Snippets Laravel 8 Artisan</summary><pre id="cc838bf0-f782-484c-b522-c837cb0ed625" class="code code-wrap"><code>php artisan make:controller TypeAhead -r</code></pre><pre id="80741fea-d02b-4bee-b2a5-5296f7099963" class="code code-wrap"><code>php artisan make:seeder ProductSeeder</code></pre><p id="b5a90c69-52b3-4cf1-aa9e-e8d9f51f938f" class="">
+    </p></details></li></ul><ul id="c356c020-3510-49f3-8c7e-5f6ba4ddf3f2" class="toggle"><li><details open=""><summary>Error Resolves </summary><figure id="8332f626-ea68-4374-ab4c-8a20fa7bff59"><a href="https://api.jquery.com/jquery.noconflict/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">jQuery.noConflict()</div><div class="bookmark-description">Many JavaScript libraries use $ as a function or variable name, just as jQuery does. In jQuery&#x27;s case, $ is just an alias for jQuery, so all functionality is available without using $. If you need to use another JavaScript library alongside jQuery, return control of $ back to the other library with a call to $.noConflict().</div></div><div class="bookmark-href"><img src="https://api.jquery.com/jquery-wp-content/themes/api.jquery.com/i/favicon.ico" class="icon bookmark-icon"/>https://api.jquery.com/jquery.noconflict/</div></div><img src="https://api.jquery.com/jquery-wp-content/themes/jquery/content/books/jquery-in-action.jpg" class="bookmark-image"/></a></figure><figure id="63ed55b5-156f-4dca-853e-6f9ccc934c4c"><a href="https://stackoverflow.com/questions/39942840/autocomplete-jquery-noconflict" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">autocomplete jQuery.noConflict</div><div class="bookmark-description">Thanks for contributing an answer to Stack Overflow! Please be sure to answer the question. Provide details and share your research! Asking for help, clarification, or responding to other answers. Making statements based on opinion; back them up with references or personal experience. To learn more, see our tips on writing great answers.</div></div><div class="bookmark-href"><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico?v=ec617d715196" class="icon bookmark-icon"/>https://stackoverflow.com/questions/39942840/autocomplete-jquery-noconflict</div></div><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded" class="bookmark-image"/></a></figure><figure id="8ad9b50f-f274-41a1-a848-1ca61965abce"><a href="https://stackoverflow.com/questions/1566595/can-i-use-multiple-versions-of-jquery-on-the-same-page" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Can I use multiple versions of jQuery on the same page?</div><div class="bookmark-description">A project I&#x27;m working on requires the use of jQuery on customers&#x27; Web pages. Customers will insert a chunk of code that we&#x27;ll supply which includes a few elements that build a widget in a -created . If they aren&#x27;t already using the latest version of jQuery, this will also include (most likely) a for Google&#x27;s hosted version of jQuery.</div></div><div class="bookmark-href"><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico?v=ec617d715196" class="icon bookmark-icon"/>https://stackoverflow.com/questions/1566595/can-i-use-multiple-versions-of-jquery-on-the-same-page</div></div><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded" class="bookmark-image"/></a></figure><figure id="e6e8ac57-d45f-492c-bd6a-d01e6a181405"><a href="https://stackoverflow.com/questions/38320293/typeahead-typeerror-it-tolowercase-is-not-a-function" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Typeahead TypeError: it.toLowerCase is not a function</div><div class="bookmark-description">Good day. Please take a look at my scrit first. My JS $(document).ready(function(){ $(&quot;#outlet&quot;).typeahead({ source: function(query, process) { $.ajax({ ...</div></div><div class="bookmark-href"><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico?v=ec617d715196" class="icon bookmark-icon"/>https://stackoverflow.com/questions/38320293/typeahead-typeerror-it-tolowercase-is-not-a-function</div></div><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded" class="bookmark-image"/></a></figure><figure id="a1b792c4-6021-4ee0-bde4-de5ec3ebeb3d"><a href="https://stackoverflow.com/questions/27478953/typeerror-typeahead-is-not-a-function" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">TypeError: $(...).typeahead is not a function</div><div class="bookmark-description">This is very basic code. Still I am facing a problem. I think I am missing something, as mentioned on bootstrap site &quot;Plugins can be included individually (though some have required dependencies), or all at once. Both bootstrap.js and bootstrap.min.js contain all plugins in a single file.&quot;</div></div><div class="bookmark-href"><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico?v=ec617d715196" class="icon bookmark-icon"/>https://stackoverflow.com/questions/27478953/typeerror-typeahead-is-not-a-function</div></div><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded" class="bookmark-image"/></a></figure><figure id="5def1f47-b749-4c57-9ec5-4fa8da8615bd"><a href="https://stackoverflow.com/questions/14419730/json-request-appended-with-object20object-in-jquery" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">JSON Request appended with [object%20Object] in jQuery</div><div class="bookmark-description">I&#x27;m trying to fetch a custom JSON feed I have written with jQuery using the getJSON method. For an unknown reason the URL seems to be having cache_gen.php?location=PL4 stripped from the end and replaced with [object%20Object] resulting in a 404 error occurring.</div></div><div class="bookmark-href"><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico?v=ec617d715196" class="icon bookmark-icon"/>https://stackoverflow.com/questions/14419730/json-request-appended-with-object20object-in-jquery</div></div><img src="https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon@2.png?v=73d79a89bded" class="bookmark-image"/></a></figure><pre id="55552fdc-fcd3-44c9-9efb-a37189274461" class="code code-wrap"><code>https://www.google.com/search?q=type+ahead+and+jquery+no+conflict&amp;rlz=1C1BNSD_enBD995BD995&amp;oq=type+ahead+and+jquery+no+conflivc&amp;aqs=chrome.1.69i57j33i10i160l2.15655j0j7&amp;sourceid=chrome&amp;ie=UTF-8
+    
+    https://www.google.com/search?q=how+to+work+with+multiple+jquery&amp;rlz=1C1BNSD_enBD995BD995&amp;oq=how+to+work+with+multiple+jquery&amp;aqs=chrome..69i57j0i22i30j0i390l3.14730j0j7&amp;sourceid=chrome&amp;ie=UTF-8
+    
+    https://www.google.com/search?q=Uncaught+TypeError%3A+item.toLowerCase+is+not+a+function+at+Typeahead&amp;rlz=1C1BNSD_enBD995BD995&amp;biw=1360&amp;bih=625&amp;sxsrf=APq-WBuc6_6mY-2trDX2HzILvHr4H_0sWg%3A1650785210744&amp;ei=uvtkYqD1LOnB3LUPzcWh0Ac&amp;ved=0ahUKEwigutiQlqz3AhXpILcAHc1iCHoQ4dUDCA4&amp;uact=5&amp;oq=Uncaught+TypeError%3A+item.toLowerCase+is+not+a+function+at+Typeahead&amp;gs_lcp=Cgdnd3Mtd2l6EANKBAhBGABKBAhGGABQAFgAYO4BaABwAHgAgAFtiAFtkgEDMC4xmAEAoAEBwAEB&amp;sclient=gws-wiz
+    
+    https://www.google.com/search?q=Uncaught+TypeError%3A+%24(...).typeahead+is+not+a+function&amp;rlz=1C1BNSD_enBD995BD995&amp;oq=Uncaught+TypeError%3A+%24(...).typeahead+is+not+a+function&amp;aqs=chrome..69i57.513850j0j7&amp;sourceid=chrome&amp;ie=UTF-8
+    
+    https://www.google.com/search?q=%5Bobject%2520Object%5D%3Fquery%3D&amp;rlz=1C1BNSD_enBD995BD995&amp;oq=%5Bobject%2520Object%5D%3Fquery%3D&amp;aqs=chrome..69i57.95346j0j4&amp;sourceid=chrome&amp;ie=UTF-8</code></pre></details></li></ul><ul id="f9617c85-fa01-421a-8a62-2143ea396106" class="toggle"><li><details open=""><summary>Type Ahead Examples</summary><p id="31ff923d-d175-4bf5-a7d4-2bd0ab293d71" class=""> </p><figure id="0bc30e37-85f3-45fb-9687-b64222a84b50"><a href="https://twitter.github.io/typeahead.js/examples/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">examples</div><div class="bookmark-description">When initializing a typeahead using the typeahead.js jQuery plugin, you pass the plugin method one or more datasets. The source of a dataset is responsible for computing a set of suggestions for a given query.</div></div><div class="bookmark-href">https://twitter.github.io/typeahead.js/examples/</div></div></a></figure></details></li></ul><ul id="66179930-ce21-420c-b69b-79c15f4e2550" class="toggle"><li><details open=""><summary>CDNS</summary><figure id="8c3d41b2-72e8-4829-9f6a-fff24f18076d"><a href="https://cdnjs.com/libraries/jquery-typeahead" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title"></div></div><div class="bookmark-href">https://cdnjs.com/libraries/jquery-typeahead</div></div></a></figure><figure id="ff979e10-d9e4-4638-9343-220e61b913b4"><a href="https://cdnjs.com/libraries/corejs-typeahead/0.11.1" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">corejs-typeahead - Libraries - cdnjs - The #1 free and open source CDN built to make life easier for developers</div><div class="bookmark-description">fast and fully-featured autocomplete library - Simple. Fast. Reliable. Content delivery at its finest. cdnjs is a free and open-source CDN service trusted by over 12.5% of all websites, serving over 200 billion requests each month, powered by Cloudflare. We make it faster and easier to load library files on your websites.</div></div><div class="bookmark-href"><img src="https://cdnjs.com/favicon.png" class="icon bookmark-icon"/>https://cdnjs.com/libraries/corejs-typeahead/0.11.1</div></div><img src="https://cdnjs.com/banner.png" class="bookmark-image"/></a></figure><p id="9acbfa72-dcee-4a41-9208-32d075456b4c" class="">
+    </p></details></li></ul><ul id="18a2b8d9-6a00-4d03-a9b9-37f0694173a6" class="toggle"><li><details open=""><summary>SQL Command Snippets</summary><p id="a928db9a-6dd4-45bf-92fe-203ecd4dd52b" class="">Quick Product Add</p><pre id="db64e81c-5791-4cc7-af82-9759af58d5f1" class="code code-wrap"><code>INSERT INTO `products` (`id`, `product_name`, `product_slug`, `product_about`, `regular_price`, `sell_price`, `product_image`, `product_fetured`, `category_id`, `sub_category_id`, `product_thumbnail`, `product_rating`, `created_at`, `updated_at`) VALUES (1, &#x27;Red tulip&#x27;, &#x27;red-tulip&#x27;, &#x27;Red tulip&#x27;, &#x27;100&#x27;, &#x27;90&#x27;, &#x27;red-tulip.jpg&#x27;, &#x27;&#x27;, &#x27;&#x27;, &#x27;&#x27;, &#x27;&#x27;, &#x27;0&#x27;, &#x27;2022-04-24 14:07:42&#x27;, &#x27;2022-04-24 14:07:43&#x27;);
+    INSERT INTO `products` (`id`, `product_name`, `product_slug`, `product_about`, `regular_price`, `sell_price`, `product_image`, `product_fetured`, `category_id`, `sub_category_id`, `product_thumbnail`, `product_rating`, `created_at`, `updated_at`) VALUES (2, &#x27;Red Rose&#x27;, &#x27;red-rose&#x27;, &#x27;Red Rose&#x27;, &#x27;70&#x27;, &#x27;60&#x27;, &#x27;red-rose.jpg&#x27;, &#x27;&#x27;, &#x27;&#x27;, &#x27;&#x27;, &#x27;&#x27;, &#x27;0&#x27;, &#x27;2022-04-24 14:09:08&#x27;, &#x27;2022-04-24 14:09:09&#x27;);</code></pre></details></li></ul><p id="1a05756d-6005-4e81-a743-cf705552117a" class="">
+    </p></div></article></body></html>
