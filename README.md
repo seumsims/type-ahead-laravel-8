@@ -1,4 +1,5 @@
 # Laravel 8 and Twitter Type Ahead
+## [Laravel 8 and Twitter Type Ahead Git Hub Pages](https://seumsims.github.io/type-ahead-laravel-8/)
 
 - Video Tutorials
     
