@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\TypeaheadAutocompleteController;
+use App\Http\Controllers\TwitterTypeAheadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,5 +21,7 @@ Route::get('/', function () {
 });
 
 Route::get('/typeahead_autocomplete', [TypeaheadAutocompleteController::class, 'index']);
+
+Route::get('/twitter-typeahead', [TwitterTypeAheadController::class, 'index']);
 
 Route::get('/typeahead_autocomplete/action', [TypeaheadAutocompleteController::class, 'action'])->name('typeahead_autocomplete.action');
